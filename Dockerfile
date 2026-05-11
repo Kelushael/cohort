@@ -3,12 +3,12 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --production=false
+RUN npm install
 
 COPY tsconfig.json ./
 COPY src/ ./src/
 
-RUN npm run build && npm prune --production
+RUN npm run build && npm prune --omit=dev
 
 EXPOSE 3000
 

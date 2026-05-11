@@ -1,48 +1,16 @@
-version: "3.9"
-
 networks:
   axis:
     external: false
 
 services:
-  traefik:
-    image: traefik:v3.0
-    container_name: traefik
-    restart: unless-stopped
-    networks:
-      - axis
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik/acme.json:/acme.json
-    command:
-      - --api.insecure=false
-      - --providers.docker=true
-      - --providers.docker.exposedbydefault=false
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.le.acme.httpchallenge=true
-      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
-      - --certificatesresolvers.le.acme.email=marcus@axis-mundi.local
-      - --certificatesresolvers.le.acme.storage=/acme.json
-
   axis-mcp:
     build: .
     container_name: axis-mcp
     restart: unless-stopped
     networks:
       - axis
+    ports:
+      - "127.0.0.1:3000:3000"
     environment:
       - PORT=3000
       - NODE_ENV=production
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.axis.rule=Host(`srv1589112.hstgr.cloud`)
-      - traefik.http.routers.axis.entrypoints=websecure
-      - traefik.http.routers.axis.tls=true
-      - traefik.http.routers.axis.tls.certresolver=le
-      - traefik.http.services.axis.loadbalancer.server.port=3000
